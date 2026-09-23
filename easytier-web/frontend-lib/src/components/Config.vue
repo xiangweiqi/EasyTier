@@ -311,12 +311,13 @@ function removeVpnPortalClient(index: number) {
                 </div>
 
         
+
 <div class="flex flex-col gap-2 basis-5/12 grow">
   <label for="credential">{{ t('credential') }}</label>
-  <Password id="credential" v-model="credentialModel"
-    aria-describedby="credential-help" toggleMask :feedback="false" fluid />
+  <InputText id="credential" v-model="credentialModel"
+    aria-describedby="credential-help" />
   <small id="credential-help" class="text-gray-500">
-    填写凭据，留空则自动生成随机身份
+    填写凭据（base64 私钥），留空则自动生成随机身份
   </small>
 </div>
 
