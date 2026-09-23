@@ -257,38 +257,30 @@ impl NetworkConfigExt for NetworkConfig {
         // The web UI does not expose credential inputs directly, but imported/saved
         // NetworkConfig objects still need to preserve credential-mode instances via
         // secure_mode.local_private_key + empty network_secret.
-        let credential_secret = if self.network_secret.is_some() {
-            None
-        } else {
-            self.secure_mode
+               let credential_secret = match &self.network_secret {
+            Some(secret) if !secret.is_empty() => None,
+            _ => self
+                .secure_mode
                 .as_ref()
                 .and_then(|mode| mode.local_private_key.clone())
-                .filter(|s| !s.is_empty())
+                .filter(|s| !s.is_empty()),
         };
 
-        if credential_secret.is_some() {
+        if let Some(secret) = &self.network_secret {
+            if secret.is_empty() {
+                cfg.set_network_identity(NetworkIdentity::new_credential(
+                    self.network_name.clone().unwrap_or_default(),
+                ));
+            } else {
+                cfg.set_network_identity(NetworkIdentity::new(
+                    self.network_name.clone().unwrap_or_default(),
+                    secret.clone(),
+                ));
+            }
+        } else {
             cfg.set_network_identity(NetworkIdentity::new_credential(
                 self.network_name.clone().unwrap_or_default(),
             ));
-        } else {
-          if let Some(secret) = &self.network_secret {
-    if secret.is_empty() {
-        // 空字符串也走凭据模式
-        cfg.set_network_identity(NetworkIdentity::new_credential(
-            self.network_name.clone().unwrap_or_default(),
-        ));
-    } else {
-        cfg.set_network_identity(NetworkIdentity::new(
-            self.network_name.clone().unwrap_or_default(),
-            secret.clone(),
-        ));
-    }
-} else {
-    // network_secret 为 None，走凭据模式
-    cfg.set_network_identity(NetworkIdentity::new_credential(
-        self.network_name.clone().unwrap_or_default(),
-    ));
-});
         }
 
         if !cfg.get_dhcp() {
