@@ -31,7 +31,7 @@ const curNetwork = defineModel('curNetwork', {
 })
 
 
-// ↓↓↓ 新增这一段 ↓↓↓
+// ↓↓↓ 新增这一段 ↓↓↓11
 const credentialModel = computed({
   get: () => curNetwork.value.secure_mode?.local_private_key ?? '',
   set: (val: string) => {
