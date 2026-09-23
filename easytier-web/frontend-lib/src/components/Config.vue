@@ -30,6 +30,24 @@ const curNetwork = defineModel('curNetwork', {
   default: DEFAULT_NETWORK_CONFIG,
 })
 
+
+// ↓↓↓ 新增这一段 ↓↓↓
+const credentialModel = computed({
+  get: () => curNetwork.value.secure_mode?.local_private_key ?? '',
+  set: (val: string) => {
+    if (!curNetwork.value.secure_mode) {
+      curNetwork.value.secure_mode = { enabled: true, local_private_key: '', local_public_key: undefined }
+    }
+    curNetwork.value.secure_mode.local_private_key = val
+    curNetwork.value.secure_mode.enabled = val.length > 0
+    if (val.length > 0) {
+      curNetwork.value.network_secret = ''
+    }
+  },
+})
+// ↑↑↑ 新增结束 ↑↑↑
+
+
 const { t } = useI18n()
 
 const protos: { [proto: string]: number } = {
@@ -168,8 +186,12 @@ function syncNormalizedNetwork(network: NetworkConfig | undefined): void {
   }
 
   Object.assign(network, normalizeNetworkConfig(network))
-}
 
+  // 如果已有凭据，强制清空 network_secret，避免历史残留值导致走密码模式
+  if (network.secure_mode?.local_private_key) {
+    network.network_secret = ''
+  }
+}
 watch(() => curNetwork.value, syncNormalizedNetwork, { immediate: true, deep: false })
 
 function parseInstanceRecvBpsLimitInput(value: string): number | string | null | undefined {
@@ -287,11 +309,17 @@ function removeVpnPortalClient(index: number) {
                   <label for="network_name">{{ t('network_name') }}</label>
                   <InputText id="network_name" v-model="curNetwork.network_name" aria-describedby="network_name-help" />
                 </div>
-                <div class="flex flex-col gap-2 basis-5/12 grow">
-                  <label for="network_secret">{{ t('network_secret') }}</label>
-                  <Password id="network_secret" v-model="curNetwork.network_secret"
-                    aria-describedby="network_secret-help" toggleMask :feedback="false" fluid />
-                </div>
+
+        
+<div class="flex flex-col gap-2 basis-5/12 grow">
+  <label for="credential">{{ t('credential') }}</label>
+  <Password id="credential" v-model="curNetwork.secure_mode.local_private_key"
+    aria-describedby="credential-help" toggleMask :feedback="false" fluid />
+  <small id="credential-help" class="text-gray-500">
+    填写凭据，留空则自动生成随机身份
+  </small>
+</div>
+
               </div>
 
               <div class="flex flex-row gap-x-9 flex-wrap">
