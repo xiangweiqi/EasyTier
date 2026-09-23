@@ -31,7 +31,7 @@ const curNetwork = defineModel('curNetwork', {
 })
 
 
-// ↓↓↓ 新增这一段 ↓↓↓11
+// ↓↓↓ 新增这一段 ↓↓↓
 const credentialModel = computed({
   get: () => curNetwork.value.secure_mode?.local_private_key ?? '',
   set: (val: string) => {
@@ -313,7 +313,7 @@ function removeVpnPortalClient(index: number) {
         
 <div class="flex flex-col gap-2 basis-5/12 grow">
   <label for="credential">{{ t('credential') }}</label>
-  <Password id="credential" v-model="curNetwork.secure_mode.local_private_key"
+  <Password id="credential" v-model="credentialModel"
     aria-describedby="credential-help" toggleMask :feedback="false" fluid />
   <small id="credential-help" class="text-gray-500">
     填写凭据，留空则自动生成随机身份
