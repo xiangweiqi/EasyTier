@@ -271,10 +271,24 @@ impl NetworkConfigExt for NetworkConfig {
                 self.network_name.clone().unwrap_or_default(),
             ));
         } else {
-            cfg.set_network_identity(NetworkIdentity::new(
-                self.network_name.clone().unwrap_or_default(),
-                self.network_secret.clone().unwrap_or_default(),
-            ));
+          if let Some(secret) = &self.network_secret {
+    if secret.is_empty() {
+        // 空字符串也走凭据模式
+        cfg.set_network_identity(NetworkIdentity::new_credential(
+            self.network_name.clone().unwrap_or_default(),
+        ));
+    } else {
+        cfg.set_network_identity(NetworkIdentity::new(
+            self.network_name.clone().unwrap_or_default(),
+            secret.clone(),
+        ));
+    }
+} else {
+    // network_secret 为 None，走凭据模式
+    cfg.set_network_identity(NetworkIdentity::new_credential(
+        self.network_name.clone().unwrap_or_default(),
+    ));
+});
         }
 
         if !cfg.get_dhcp() {
