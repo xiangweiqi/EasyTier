@@ -149,6 +149,12 @@ export function DEFAULT_NETWORK_CONFIG(): NetworkConfig {
     enable_private_mode: false,
     port_forwards: [],
     acl: emptyAcl(),
+    secure_mode: {
+      enabled: false,
+      local_private_key: '',
+      local_public_key: undefined,
+    },
+
   }
 }
 
